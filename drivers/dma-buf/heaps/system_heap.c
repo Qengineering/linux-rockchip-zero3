@@ -42,6 +42,32 @@ struct dma_heap_attachment {
 	bool mapped;
 };
 
+#ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
+{
+    static const struct dma_heap_ops dma32_heap_ops = {
+        .allocate = system_heap_allocate_dma32,
+    };
+
+    struct dma_heap_export_info x32 = {
+        .name = "system-dma32",
+        .ops = &dma32_heap_ops,
+        .priv = NULL,
+    };
+
+    struct dma_heap_export_info uncached_x32 = {
+        .name = "system-uncached-dma32",
+        .ops = &uncached_dma32_heap_ops,
+        .priv = NULL,
+    };
+
+    dma32_heap = dma_heap_add(&x32);
+    if (IS_ERR(dma32_heap))
+        return PTR_ERR(dma32_heap);
+
+    dma_heap_add(&uncached_x32);
+}
+#endif
+
 #define LOW_ORDER_GFP (GFP_HIGHUSER | __GFP_ZERO)
 #define HIGH_ORDER_GFP  (((GFP_HIGHUSER | __GFP_ZERO | __GFP_NOWARN \
 				| __GFP_NORETRY) & ~__GFP_RECLAIM) \
@@ -214,8 +240,7 @@ static int system_heap_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 			return 0;
 	}
 	// Apply uncached mapping if using system-uncached-dma32
-	if (buffer->heap && buffer->heap->name &&
-	    strcmp(dma_heap_get_name(buffer->heap), "system-uncached-dma32") == 0) {
+	if (buffer->heap && strcmp(dma_heap_get_name(buffer->heap), "system-uncached-dma32") == 0) {
 		addr = vma->vm_start;
 		for_each_sgtable_page(table, &piter, vma->vm_pgoff) {
 			struct page *page = sg_page_iter_page(&piter);
@@ -630,31 +655,6 @@ static int system_heap_create(void)
 	sys_heap = dma_heap_add(&exp_info);
 	if (IS_ERR(sys_heap))
 		return PTR_ERR(sys_heap);
-#ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
-	{
-		static const struct dma_heap_ops dma32_heap_ops = {
-			.allocate = system_heap_allocate_dma32,
-		};
-
-		struct dma_heap_export_info x32 = {
-			.name = "system-dma32",
-			.ops = &dma32_heap_ops,
-			.priv = NULL,
-		};
-
-		dma32_heap = dma_heap_add(&x32);
-		if (IS_ERR(dma32_heap))
-			return PTR_ERR(dma32_heap);
-
-		struct dma_heap_export_info uncached_x32 = {
-  		  .name = "system-uncached-dma32",
-  		  .ops = &uncached_dma32_heap_ops,
-  		  .priv = NULL,
-		};
-		dma_heap_add(&uncached_x32);
-
-	}
-#endif
 	return 0;
 }
 module_init(system_heap_create);
