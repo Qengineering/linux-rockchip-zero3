@@ -43,7 +43,6 @@ struct dma_heap_attachment {
 };
 
 #ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
-{
     static const struct dma_heap_ops dma32_heap_ops = {
         .allocate = system_heap_allocate_dma32,
     };
@@ -64,8 +63,8 @@ struct dma_heap_attachment {
     if (IS_ERR(dma32_heap))
         return PTR_ERR(dma32_heap);
 
+    dma_heap_add(&x32);
     dma_heap_add(&uncached_x32);
-}
 #endif
 
 #define LOW_ORDER_GFP (GFP_HIGHUSER | __GFP_ZERO)
