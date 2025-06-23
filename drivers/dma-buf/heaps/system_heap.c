@@ -615,6 +615,10 @@ static const struct dma_heap_ops system_heap_ops = {
 	.allocate = system_heap_allocate,
 };
 
+static const struct dma_heap_ops uncached_dma32_heap_ops = {
+ 	  .allocate = system_heap_allocate_uncached_dma32,
+};	
+
 static int system_heap_create(void)
 {
 	struct dma_heap_export_info exp_info;
@@ -642,9 +646,6 @@ static int system_heap_create(void)
 		if (IS_ERR(dma32_heap))
 			return PTR_ERR(dma32_heap);
 
-		static const struct dma_heap_ops uncached_dma32_heap_ops = {
-	  	  .allocate = system_heap_allocate_uncached_dma32,
-		};	
 		struct dma_heap_export_info uncached_x32 = {
   		  .name = "system-uncached-dma32",
   		  .ops = &uncached_dma32_heap_ops,
