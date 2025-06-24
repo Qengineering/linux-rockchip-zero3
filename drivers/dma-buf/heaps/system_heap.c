@@ -42,31 +42,6 @@ struct dma_heap_attachment {
 	bool mapped;
 };
 
-#ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
-    static const struct dma_heap_ops dma32_heap_ops = {
-        .allocate = system_heap_allocate_dma32,
-    };
-
-    struct dma_heap_export_info x32 = {
-        .name = "system-dma32",
-        .ops = &dma32_heap_ops,
-        .priv = NULL,
-    };
-
-    struct dma_heap_export_info uncached_x32 = {
-        .name = "system-uncached-dma32",
-        .ops = &uncached_dma32_heap_ops,
-        .priv = NULL,
-    };
-
-    dma32_heap = dma_heap_add(&x32);
-    if (IS_ERR(dma32_heap))
-        return PTR_ERR(dma32_heap);
-
-    dma_heap_add(&x32);
-    dma_heap_add(&uncached_x32);
-#endif
-
 #define LOW_ORDER_GFP (GFP_HIGHUSER | __GFP_ZERO)
 #define HIGH_ORDER_GFP  (((GFP_HIGHUSER | __GFP_ZERO | __GFP_NOWARN \
 				| __GFP_NORETRY) & ~__GFP_RECLAIM) \
@@ -633,6 +608,31 @@ free_buffer:
 
     return ERR_PTR(ret);
 }
+#endif
+
+#ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
+    static const struct dma_heap_ops dma32_heap_ops = {
+        .allocate = system_heap_allocate_dma32,
+    };
+
+    struct dma_heap_export_info x32 = {
+        .name = "system-dma32",
+        .ops = &dma32_heap_ops,
+        .priv = NULL,
+    };
+
+    struct dma_heap_export_info uncached_x32 = {
+        .name = "system-uncached-dma32",
+        .ops = &uncached_dma32_heap_ops,
+        .priv = NULL,
+    };
+
+    dma32_heap = dma_heap_add(&x32);
+    if (IS_ERR(dma32_heap))
+        return PTR_ERR(dma32_heap);
+
+    dma_heap_add(&x32);
+    dma_heap_add(&uncached_x32);
 #endif
 
 static const struct dma_heap_ops system_heap_ops = {
