@@ -20,6 +20,7 @@
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
+#include <linux/init.h>
 
 // Forward declaration
 static struct dma_heap *dma32_heap;
@@ -627,26 +628,25 @@ static int system_heap_create(void)
 		return PTR_ERR(sys_heap);
 
 #ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
-	{
-		struct dma_heap_export_info x32 = {
-			.name = "system-dma32",
-			.ops = &dma32_heap_ops,
-			.priv = NULL,
-		};
+	struct dma_heap_export_info x32 = {
+		.name = "system-dma32",
+		.ops = &dma32_heap_ops,
+		.priv = NULL,
+	};
 
-		struct dma_heap_export_info uncached_x32 = {
-			.name = "system-uncached-dma32",
-			.ops = &uncached_dma32_heap_ops,
-			.priv = NULL,
-		};
+	struct dma_heap_export_info uncached_x32 = {
+		.name = "system-uncached-dma32",
+		.ops = &uncached_dma32_heap_ops,
+		.priv = NULL,
+	};
 
-		dma32_heap = dma_heap_add(&x32);
-		if (IS_ERR(dma32_heap))
-			return PTR_ERR(dma32_heap);
+	dma32_heap = dma_heap_add(&x32);
+	if (IS_ERR(dma32_heap))
+		return PTR_ERR(dma32_heap);
 
-		dma_heap_add(&uncached_x32);
-	}
+	dma_heap_add(&uncached_x32);
 #endif
+
 	return 0;
 }
 
