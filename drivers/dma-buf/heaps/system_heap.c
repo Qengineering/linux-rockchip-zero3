@@ -610,7 +610,15 @@ free_buffer:
 }
 #endif
 
+static const struct dma_heap_ops system_heap_ops = {
+	.allocate = system_heap_allocate,
+};
+
 #ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
+    static const struct dma_heap_ops uncached_dma32_heap_ops = {
+ 	.allocate = system_heap_allocate_uncached_dma32,
+    };	
+
     static const struct dma_heap_ops dma32_heap_ops = {
         .allocate = system_heap_allocate_dma32,
     };
@@ -634,14 +642,6 @@ free_buffer:
     dma_heap_add(&x32);
     dma_heap_add(&uncached_x32);
 #endif
-
-static const struct dma_heap_ops system_heap_ops = {
-	.allocate = system_heap_allocate,
-};
-
-static const struct dma_heap_ops uncached_dma32_heap_ops = {
- 	  .allocate = system_heap_allocate_uncached_dma32,
-};	
 
 static int system_heap_create(void)
 {
