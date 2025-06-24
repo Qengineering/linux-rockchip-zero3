@@ -630,6 +630,14 @@ static int system_heap_create(void)
 		return PTR_ERR(sys_heap);
 
 #ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
+	static const struct dma_heap_ops dma32_heap_ops = {
+		.allocate = system_heap_allocate_dma32,
+	};
+
+	static const struct dma_heap_ops uncached_dma32_heap_ops = {
+    		.allocate = system_heap_uncached_dma32_allocate,
+    		.name = "system-uncached-dma32",
+	};
 	struct dma_heap_export_info x32 = {
 		.name = "system-dma32",
 		.ops = &dma32_heap_ops,
