@@ -21,6 +21,8 @@
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/init.h>
+#include <linux/dma-heap-internal.h>
+
 
 // Forward declaration
 static struct dma_heap *dma32_heap;
