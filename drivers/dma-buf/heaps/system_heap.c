@@ -620,24 +620,15 @@ static const struct dma_heap_ops system_heap_ops = {
 static int system_heap_create(void)
 {
 	struct dma_heap_export_info exp_info;
-
-	exp_info.name = "system";
-	exp_info.ops = &system_heap_ops;
-	exp_info.priv = NULL;
-
-	sys_heap = dma_heap_add(&exp_info);
-	if (IS_ERR(sys_heap))
-		return PTR_ERR(sys_heap);
-
 #ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
 	static const struct dma_heap_ops dma32_heap_ops = {
 		.allocate = system_heap_allocate_dma32,
 	};
 
 	static const struct dma_heap_ops uncached_dma32_heap_ops = {
-    		.allocate = system_heap_uncached_dma32_allocate,
-    		.name = "system-uncached-dma32",
+		.allocate = system_heap_allocate_uncached_dma32,
 	};
+
 	struct dma_heap_export_info x32 = {
 		.name = "system-dma32",
 		.ops = &dma32_heap_ops,
@@ -649,14 +640,23 @@ static int system_heap_create(void)
 		.ops = &uncached_dma32_heap_ops,
 		.priv = NULL,
 	};
+#endif
 
+	exp_info.name = "system";
+	exp_info.ops = &system_heap_ops;
+	exp_info.priv = NULL;
+
+	sys_heap = dma_heap_add(&exp_info);
+	if (IS_ERR(sys_heap))
+		return PTR_ERR(sys_heap);
+
+#ifdef CONFIG_DMABUF_HEAPS_SYSTEM_DMA32
 	dma32_heap = dma_heap_add(&x32);
 	if (IS_ERR(dma32_heap))
 		return PTR_ERR(dma32_heap);
 
 	dma_heap_add(&uncached_x32);
 #endif
-
 	return 0;
 }
 
