@@ -356,6 +356,9 @@ void __init arm64_memblock_init(void)
 			memblock_reserve(base, size);
 		}
 	}
+	
+	/* Limit usable memory to 4GB */
+	memblock_remove(0x100000000ULL, 0xFFFFFFFFFFFFF000ULL);
 
 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
 		extern u16 memstart_offset_seed;
